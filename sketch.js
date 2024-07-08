@@ -3,11 +3,13 @@ let cw = 600, ch = 600
 //grid variables
 let gx = 20, gy = 20, cs = 20, rws = 28, cms = 28;
 let minRadius = 3;
+let maxRadius = 5;
 let ptAmnt = 10;
 
 // initialize points arrays
 let points = [];
 let colors = [];
+//rects defines rects as [Right,Upper,Left,Lower]
 let rects = [];
 let ptvel = [];
 let ptacc = [];
@@ -92,9 +94,26 @@ function drawPoint(x, y, i = -1) {
 //   rect(x1, y1, x2-x1, y2-y1);
 // }
 
+function drawRects() {
+  noFill();
+  for (let i = 0; i < ptAmnt; i++) {
+    [r, g, b] = colors[i];
+    stroke(r, g, b);
+    xr = 
+    yu =
+    xl =
+    yd = 
+    rect()
+  }
+}
+
 //converts a grid tile to canvas space
 function tileToLoc(i, j) {
-  return [x, y] = [gx + cs * i + cs / 2, gy + cs * (rws - j) - cs / 2];
+  return [x, y] = [gx + cs * i, gy + cs * (rws - j)];
+}
+
+function locToMP(i, j) {
+  return [x, y] = [i + cs / 2, j - cs / 2]
 }
 
 function DelaunayTriangulation() {
@@ -109,6 +128,9 @@ function draw() {
   for (let i = 0; i < ptAmnt; i++) {
     let thisPoint = points[i];
     let [xi, yi] = tileToLoc(thisPoint[0], thisPoint[1])
+    mp = locToMP(xi, yi);
+    xi = mp[0]
+    yi = mp[1]
     drawPoint(xi, yi, i);
   }
   // let u = tileToLoc(6, 7);
