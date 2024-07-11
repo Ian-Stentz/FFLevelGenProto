@@ -99,11 +99,15 @@ function drawRects() {
   for (let i = 0; i < ptAmnt; i++) {
     [r, g, b] = colors[i];
     stroke(r, g, b);
-    xr = 
-    yu =
-    xl =
-    yd = 
-    rect()
+    let pt = points[i];
+    let rect = rects[i];
+    let xr = pt[0] + rect[0];
+    let yu = pt[1] - rect[1];
+    let xl = pt[0] - rect[2];
+    let yd = pt[1] + rect[3];
+    let [l, u] = tileToLoc(xl, yu)
+    let [r, d] = tileToLoc(xr, yd)
+    rect(l, u, r-l, d-u);
   }
 }
 
