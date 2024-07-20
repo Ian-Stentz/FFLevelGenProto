@@ -16,50 +16,71 @@ let ptacc = [];
 
 // initialize action queue
 
+
 function dist2(x1, y1, x2, y2) {
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 }
 
+function proposePoint() {
+  return [i, j] = [Math.floor(Math.random() * (cms - 2 * minRadius)) + minRadius, Math.floor(Math.random() * (rws - 2 * minRadius)) + minRadius];
+}
+
 //populate points array
-for (let n = 0; n < ptAmnt; n++) {
-  let i = Math.floor(Math.random() * cms);
-  let j = Math.floor(Math.random() * rws);
-  for (let k = 0; k < 5; k++) {
-    for (let point of points) {
-      let ii = point[0];
-      let jj = point[1];
-      if(dist2(i, j, ii, jj) <= minRadius) {
-        i = Math.floor(Math.random() * cms);
-        j = Math.floor(Math.random() * rws);
-        break;
+function generatePoints() {
+  for (let n = 0; n < ptAmnt; n++) {
+    let [i, j] = proposePoint();
+    for (let k = 0; k < 5; k++) {
+      for (let point of points) {
+        let ii = point[0];
+        let jj = point[1];
+        if(dist2(i, j, ii, jj) <= minRadius) {
+          let pNew = proposePoint(); 
+          i = pNew[0];
+          j = pNew[1];
+          break;
+        }
       }
     }
+    points.push([i,j]);
   }
-  points.push([i,j]);
 }
 
 //colors!
-for (let n = 0; n < ptAmnt; n++) {
-  let r = Math.random() * 256;
-  let g = Math.random() * 256;
-  let b = Math.random() * 256;
-  while(Math.sqrt(r ** 2 + g ** 2 + b ** 2) > 192) {
-    console.log("regenerated")
-    r = Math.random() * 256;
-    g = Math.random() * 256;
-    b = Math.random() * 256;
+function generateColors() {
+  for (let n = 0; n < ptAmnt; n++) {
+    let r = Math.random() * 256;
+    let g = Math.random() * 256;
+    let b = Math.random() * 256;
+    while(Math.sqrt(r ** 2 + g ** 2 + b ** 2) > 192) {
+      console.log("regenerated")
+      r = Math.random() * 256;
+      g = Math.random() * 256;
+      b = Math.random() * 256;
+    }
+    colors.push([r,g,b]);
   }
-  colors.push([r,g,b]);
 }
 
-console.log(points);
+function generateRects() {
+  for (let n = 0; n < ptAmnt; n++) {
+    let width = Math.floor(Math.random() * (maxRadius) * 2) + 1;
+    let height = Math.floor(Math.random() * (maxRadius) * 2) + 1;
+    rects[n] = [Math.ceil(width/2), Math.ceil(height/2), Math.floor(width/2), Math.floor(height/2)]
+  }
+}
 
 function setup() {
   createCanvas(cw, ch);
+  generatePoints();
+  generateColors();
+  generateRects();
+  console.log(points);
+  console.log(rects);
 }
 
 //draws a grid with upper left corner at (startx,starty) with a cell size of cell and with "rows" amount of rows and "columns" amount of columns
 function drawGrid(startx, starty, cell, rows, columns) {
+  strokeWeight(1);
   let xf = startx + cell * rows;
   let yf = starty + cell * rows;
   for (let i = 0; i <= rows; i++) {
@@ -74,6 +95,7 @@ function drawGrid(startx, starty, cell, rows, columns) {
 
 //draws a point (small circle) at indicated location
 function drawPoint(x, y, i = -1) {
+  strokeWeight(1);
   if(i == -1) {
     stroke("black");
     fill("black");
@@ -97,16 +119,17 @@ function drawPoint(x, y, i = -1) {
 function drawRects() {
   noFill();
   for (let i = 0; i < ptAmnt; i++) {
-    [r, g, b] = colors[i];
-    stroke(r, g, b);
+    let [cr, cg, cb] = colors[i];
+    stroke(cr, cg, cb);
+    strokeWeight(4);
     let pt = points[i];
-    let rect = rects[i];
-    let xr = pt[0] + rect[0];
-    let yu = pt[1] - rect[1];
-    let xl = pt[0] - rect[2];
-    let yd = pt[1] + rect[3];
-    let [l, u] = tileToLoc(xl, yu)
-    let [r, d] = tileToLoc(xr, yd)
+    let myRect = rects[i];
+    let xr = pt[0] + myRect[0];
+    let yu = pt[1] + myRect[1];
+    let xl = pt[0] - myRect[2];
+    let yd = pt[1] - myRect[3];
+    let [l, u] = tileToLoc(xl, yu);
+    let [r, d] = tileToLoc(xr, yd);
     rect(l, u, r-l, d-u);
   }
 }
@@ -124,10 +147,16 @@ function DelaunayTriangulation() {
   return;
 }
 
+function update() {
+
+}
+
 function draw() {
+  update()
   background(220);
   noFill();
   stroke("black");
+  strokeWeight(1);
   drawGrid(gx, gy, cs, rws, cms);
   for (let i = 0; i < ptAmnt; i++) {
     let thisPoint = points[i];
@@ -137,6 +166,7 @@ function draw() {
     yi = mp[1]
     drawPoint(xi, yi, i);
   }
+  drawRects();
   // let u = tileToLoc(6, 7);
   // let v = tileToLoc(1, 3);
   // let a = u[0];
