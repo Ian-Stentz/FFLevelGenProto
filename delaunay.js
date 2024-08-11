@@ -60,3 +60,4 @@ function inCircumcircle(A, B, C, D) {
 // console.log(determinant([[2,0,0,0],[0,2,0,0],[0,0,2,0],[0,0,0,2]], 4));
 // //expecting: -240
 // console.log(determinant([[4,3,2,2],[0,1,-3,3],[0,-1,3,3],[0,3,1,1]], 4));
+

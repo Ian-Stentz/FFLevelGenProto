@@ -16,11 +16,6 @@ let ptacc = [];
 
 // initialize action queue
 
-
-function dist2(x1, y1, x2, y2) {
-  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-}
-
 function proposePoint() {
   return [i, j] = [Math.floor(Math.random() * (cms - 2 * minRadius)) + minRadius, Math.floor(Math.random() * (rws - 2 * minRadius)) + minRadius];
 }
