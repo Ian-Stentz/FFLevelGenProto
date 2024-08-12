@@ -13,6 +13,8 @@ let colors = [];
 let rects = [];
 let ptvel = [];
 let ptacc = [];
+//
+let adjList;
 
 // initialize action queue
 
@@ -69,6 +71,7 @@ function setup() {
   generatePoints();
   generateColors();
   generateRects();
+  delaunayTriangulation();
   console.log(points);
   console.log(rects);
 }
@@ -138,8 +141,20 @@ function locToMP(i, j) {
   return [x, y] = [i + cs / 2, j - cs / 2]
 }
 
-function DelaunayTriangulation() {
-  return;
+function tileToMP(i, j) {
+  [xi, yi] = tileToLoc(i, j);
+  return [x, y] = locToMP(xi, yi);
+}
+
+function delaunayTriangulation() {
+  let newPoints = [];
+  for (let [x, y] of points) {
+    newPoints.push(tileToMP(x, y));
+  }
+  let triMesh = new TriMesh(newPoints);
+  triMesh.addTri(0, 1, 2);
+  adjList = triMesh.toAdjList();
+  adjList.printAdjList();
 }
 
 function update() {
@@ -155,13 +170,12 @@ function draw() {
   drawGrid(gx, gy, cs, rws, cms);
   for (let i = 0; i < ptAmnt; i++) {
     let thisPoint = points[i];
-    let [xi, yi] = tileToLoc(thisPoint[0], thisPoint[1])
-    mp = locToMP(xi, yi);
-    xi = mp[0]
-    yi = mp[1]
+    let [xi, yi] = tileToMP(thisPoint[0], thisPoint[1])
     drawPoint(xi, yi, i);
   }
   drawRects();
+  let edgeColor = color(10, 50, 100)
+  adjList.drawAdjList(edgeColor, 1);
   // let u = tileToLoc(6, 7);
   // let v = tileToLoc(1, 3);
   // let a = u[0];

@@ -3,11 +3,11 @@ function dist2(x1, y1, x2, y2) {
   }
 
 class TriMesh {
-    constructor() {
+    constructor(points = []) {
         //a list of three points for a super triangle, for the sake of the delaunay triangulation
         this.superTri = [];
         //point list is a list of paired list points which should be never be popped from
-        this.pointList = [];
+        this.pointList = points;
         //mesh is a triangle mesh represented by 3-length lists of indices of the points involved, referencing the point list
         this.mesh = [];
     }
@@ -76,7 +76,7 @@ class TriMesh {
         }
     }
 
-    toAdjList() {
+    toAdjList(adjList) {
         let outAdjList = new adjacencyList(this.pointList);
         for (let tri of this.mesh) {
             let [a, b, c] = tri;
@@ -92,8 +92,8 @@ class adjacencyList {
     constructor(points){
         this.pointList = points;
         this.adjacencyList = [];
-        for (let i = 0; i < points.length; i++) {
-            this.pointList.push([]);
+        for (let i = 0; i < this.pointList.length; i++) {
+            this.adjacencyList.push([]);
         }
     }
 
@@ -119,7 +119,36 @@ class adjacencyList {
         return dist2(x1, y1, x2, y2);
     }
     
-    drawAdjList(strokeWeight, color) {
-        //TODO;
+    printAdjList() {
+        console.log("Point List:")
+        for (let i = 0; i < this.pointList.length; i++) {
+            let [x, y] = this.pointList[i];
+            console.log(`${i}: (${x}, ${y})`);
+        }
+        console.log("Adj List:")
+        for (let from = 0; from < this.adjacencyList.length; from++) {
+            let string = `${from}: `
+            for(let to of this.adjacencyList[from]) {
+                string += `${to}, `
+            }
+            string = string.slice(0, string.lastIndexOf(", "));
+            console.log(string);
+        }
+    }
+
+    drawAdjList(color, strokeWgt = 1) {
+        //console.log("beep");
+        strokeWeight(strokeWgt);
+        stroke(color);
+        for (let from = 0; from < this.adjacencyList.length; from++) {
+            for(let to of this.adjacencyList[from]) {
+                if (from < to) {
+                    let [x1, y1] = this.indexToPoint(from);
+                    let [x2, y2] = this.indexToPoint(to);
+                    //console.log(`(${x1}, ${y1}) to (${x2}, ${y2})`);
+                    line(x1, y1, x2, y2);
+                }
+            }
+        }
     }
 }
