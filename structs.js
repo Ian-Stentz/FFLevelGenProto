@@ -8,8 +8,8 @@ class TriMesh {
         this.superTri = [];
         //point list is a list of paired list points which should be never be popped from
         this.pointList = points;
-        //mesh is a triangle mesh represented by 3-length lists of indices of the points involved, referencing the point list
-        this.mesh = [];
+        //mesh is a triangle mesh represented by a set of 3-length lists of indices of the points involved, referencing the point list
+        this.mesh = new set();
     }
 
     addPoint(x, y) {
@@ -17,11 +17,19 @@ class TriMesh {
     }
 
     addTri(a, b, c) {
-        this.mesh.push([a,b,c]);
+        this.mesh.add([a,b,c]);
     }
 
-    triLen() {
-        return this.mesh.length;
+    addSuperTri(x,y,w,h) {
+        let pA = (x-w, y-h)
+        let pB = (x+2*w, y-h)
+        let pC = (x+w/2, y+2*h)
+        this.superTri.push(pA, pB, pC)
+        this.mesh.add(["a", "b", "c"]);
+    }
+
+    meshSize() {
+        return this.mesh.size;
     }
 
     pointLen() {
@@ -53,9 +61,10 @@ class TriMesh {
     }
 
     //Any triangle containing any of the super triangle points is pruned
+    //TO REMAKE
     removeSuperTri() {
         let ind = 0;
-        while(ind < this.triLen) {
+        while(ind < this.meshSize()) {
             let tri = this.mesh[ind];
             let prune = false;
 
