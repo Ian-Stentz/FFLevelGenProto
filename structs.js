@@ -63,26 +63,15 @@ class TriMesh {
     //Any triangle containing any of the super triangle points is pruned
     //TO REMAKE
     removeSuperTri() {
-        let ind = 0;
-        while(ind < this.meshSize()) {
-            let tri = this.mesh[ind];
-            let prune = false;
-
+        badTris = new Set()
+        for (tri of this.mesh) {
             for(let point of tri) {
                 if(point == "a" || point == "b" || point == "c") {
-                    prune = true;
-                    break;
+                    badTris.add(tri);
                 }
             }
-
-            if(prune) {
-                this.mesh.splice(ind, 1);
-                continue;
-            } else {
-                ind++;
-                continue;
-            }
         }
+        this.mesh = this.mesh.difference(badTris);
     }
 
     toAdjList(adjList) {
