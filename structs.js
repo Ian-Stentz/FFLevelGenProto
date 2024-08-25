@@ -9,7 +9,7 @@ class TriMesh {
         //point list is a list of paired list points which should be never be popped from
         this.pointList = points;
         //mesh is a triangle mesh represented by a set of 3-length lists of indices of the points involved, referencing the point list
-        this.mesh = new set();
+        this.mesh = new Set();
     }
 
     addPoint(x, y) {
@@ -55,6 +55,13 @@ class TriMesh {
         return [i, j, k];
     }
 
+    triEdges(tri) {
+        let a = tri[0]
+        let b = tri[1]
+        let c = tri[2]
+        return [[a, b], [b, c], [a, c]];
+    }
+
     indexToPoints(i) {
         let [a, b, c] = this.mesh[i];
         return this.triToPoints(a, b, c);
@@ -83,6 +90,35 @@ class TriMesh {
             outAdjList.makeUndirectedEdge(a, c);
         }
         return outAdjList;
+    }
+
+    //add Delaunay Point
+    addDelaunayPoint(newPoint) {
+        //search for bad triangles
+        //remove bad triangles from mesh
+        //find edges shared by no other bad triangle
+        //form triangles from the edges + the new point
+    }
+
+    
+    drawTriangle(tri) {
+        stroke(250, 225, 20);
+        noFill();
+        let [a, b, c] = tri
+        let [i, j, k] = this.triToPoints(a, b, c);
+        let [x1, y1] = i;
+        let [x2, y2] = j;
+        let [x3, y3] = k;
+        triangle(x1, y1, x2, y2, x3, y3);
+    }
+
+    drawTriMesh() {
+        if(this.mesh.size == 0) {
+            return;
+        }
+        for (let tri of this.mesh) {
+            this.drawTriangle(tri);
+        }
     }
 }
 

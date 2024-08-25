@@ -15,8 +15,10 @@ let ptvel = [];
 let ptacc = [];
 //
 let adjList;
+let triMesh;
 
 // initialize action queue
+let totalTime = 0;
 
 function proposePoint() {
   return [i, j] = [Math.floor(Math.random() * (cms - 2 * minRadius)) + minRadius, Math.floor(Math.random() * (rws - 2 * minRadius)) + minRadius];
@@ -64,16 +66,6 @@ function generateRects() {
     let height = Math.floor(Math.random() * (maxRadius) * 2) + 1;
     rects[n] = [Math.ceil(width/2), Math.ceil(height/2), Math.floor(width/2), Math.floor(height/2)]
   }
-}
-
-function setup() {
-  createCanvas(cw, ch);
-  generatePoints();
-  generateColors();
-  generateRects();
-  delaunayTriangulation();
-  console.log(points);
-  console.log(rects);
 }
 
 //draws a grid with upper left corner at (startx,starty) with a cell size of cell and with "rows" amount of rows and "columns" amount of columns
@@ -146,23 +138,40 @@ function tileToMP(i, j) {
   return [x, y] = locToMP(xi, yi);
 }
 
-function delaunayTriangulation() {
-  let newPoints = [];
-  for (let [x, y] of points) {
-    newPoints.push(tileToMP(x, y));
-  }
-  let triMesh = new TriMesh(newPoints);
-  triMesh.addTri(0, 1, 2);
-  adjList = triMesh.toAdjList();
-  adjList.printAdjList();
+// function delaunayTriangulation() {
+//   let newPoints = [];
+//   for (let [x, y] of points) {
+//     newPoints.push(tileToMP(x, y));
+//   }
+//   triMesh = new TriMesh(newPoints);
+//   //triMesh.addTri(0, 1, 2);
+//   adjList = triMesh.toAdjList();
+//   adjList.printAdjList();
+// }
+
+function setup() {
+  createCanvas(cw, ch);
+  generatePoints();
+  generateColors();
+  generateRects();
+  frameRate(30);
+  //delaunayTriangulation();
+  console.log(points);
+  console.log(rects);
 }
 
-function update() {
+function update(delta) {
+  totalTime += delta;
+}
 
+function keyPressed() {
+  if (key === " ") {
+    console.log("Space")
+  }
 }
 
 function draw() {
-  update()
+  update(deltaTime)
   background(220);
   noFill();
   stroke("black");
@@ -175,7 +184,8 @@ function draw() {
   }
   drawRects();
   let edgeColor = color(10, 50, 100)
-  adjList.drawAdjList(edgeColor, 1);
+  //triMesh.drawTriMesh(edgeColor);
+  //adjList.drawAdjList(edgeColor, 1);
   // let u = tileToLoc(6, 7);
   // let v = tileToLoc(1, 3);
   // let a = u[0];
