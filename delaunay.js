@@ -45,11 +45,21 @@ function inCircumcircle(A, B, C, D) {
     let [Bx, By] = B;
     let [Cx, Cy] = C;
     let [Dx, Dy] = D;
-    let myMatrix = [[Ax, Ay, Ax * Ax + Ay * Ay, 1],
-                    [Bx, By, Bx * Bx + By * By, 1],
-                    [Cx, Cy, Cx * Cx + Cy * Cy, 1],
-                    [Dx, Dy, Dx * Dx + Dy * Dy, 1]];
-    return determinant(myMatrix) > 0;
+    let adx = Ax - Dx;
+    let ady = Ay - Dy;
+    let bdx = Bx - Dx;
+    let bdy = By - Dy;
+    let cdx = Cx - Dx;
+    let cdy = Cy - Dy;
+    let myMatrix = [[adx, ady, (adx * adx) + (ady * ady)],
+                    [bdx, bdy, (bdx * bdx) + (bdy * bdy)],
+                    [cdx, cdy, (cdx * cdx) + (cdy * cdy)]];
+    let det = determinant(myMatrix, 3);
+    console.log("DET:")
+    console.log(myMatrix);
+    //console.log(A, B, C, D);
+    console.log(det);
+    return det > 0;
 }
 
 // //expecting: 1
@@ -58,6 +68,6 @@ function inCircumcircle(A, B, C, D) {
 // console.log(determinant([[7,-4,2],[3,1,-5],[2,2,-5]], 3));
 // //expecting: 16
 // console.log(determinant([[2,0,0,0],[0,2,0,0],[0,0,2,0],[0,0,0,2]], 4));
-// //expecting: -240
-// console.log(determinant([[4,3,2,2],[0,1,-3,3],[0,-1,3,3],[0,3,1,1]], 4));
+//expecting: -240
+//console.log(determinant([[4,3,2,2],[0,1,-3,3],[0,-1,3,3],[0,3,1,1]], 4));
 

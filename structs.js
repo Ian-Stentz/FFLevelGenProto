@@ -13,7 +13,7 @@ class TriMesh {
     }
 
     addPoint(x, y) {
-        this.pointList.push([x, y])
+        return this.pointList.push([x/10, y/10]) - 1;
     }
 
     addTri(a, b, c) {
@@ -21,9 +21,9 @@ class TriMesh {
     }
 
     addSuperTri(x,y,w,h) {
-        let pA = (x-w, y-h)
-        let pB = (x+2*w, y-h)
-        let pC = (x+w/2, y+2*h)
+        let pA = [(x-w)/10, (y-h)/10]
+        let pB = [(x+2*w)/10, (y-h)/10]
+        let pC = [(x+w/2)/10, (y+2*h)/10]
         this.superTri.push(pA, pB, pC)
         this.mesh.add(["a", "b", "c"]);
     }
@@ -56,10 +56,14 @@ class TriMesh {
     }
 
     triEdges(tri) {
-        let a = tri[0]
-        let b = tri[1]
-        let c = tri[2]
+        let [a, b, c] = tri;
         return [[a, b], [b, c], [a, c]];
+    }
+
+    edgeEquals(edgeA, edgeB) {
+        let [a, b] = edgeA
+        let [c, d] = edgeB
+        return ((a == c && b == d) || (a == d && b == c))
     }
 
     indexToPoints(i) {
@@ -70,8 +74,8 @@ class TriMesh {
     //Any triangle containing any of the super triangle points is pruned
     //TO REMAKE
     removeSuperTri() {
-        badTris = new Set()
-        for (tri of this.mesh) {
+        let badTris = new Set()
+        for (let tri of this.mesh) {
             for(let point of tri) {
                 if(point == "a" || point == "b" || point == "c") {
                     badTris.add(tri);
@@ -94,30 +98,73 @@ class TriMesh {
 
     //add Delaunay Point
     addDelaunayPoint(newPoint) {
+        let [npa, npb] = newPoint;
         //search for bad triangles
-        //remove bad triangles from mesh
+        let npi = this.addPoint(npa, npb);
+        npa = npa / 10;
+        npb = npb / 10;
+        let newPointMod = [npa, npb];
+        let badTriangles = new Set()
+        for (let tri of this.mesh) {
+            let [a, b, c] = tri;
+            console.log(a, b, c, npi);
+            let [i, j, k] = this.triToPoints(a, b, c);
+            console.log(i, j, k, newPointMod);
+            if(inCircumcircle(i, j, k, newPointMod)) {
+                badTriangles.add(tri);
+            }
+        }
         //find edges shared by no other bad triangle
+        let badTriArray = Array.from(badTriangles);
+        console.log("BAD TRIANGLES:")
+        console.log(badTriArray);
+        //keep track of unique edges and shared edges
+        let uniqueEdges = new Set();
+        for (let i = 0; i < badTriArray.length; i++) {
+            let edges = this.triEdges(badTriArray[i]) 
+            for (let edge of edges) {
+                let unique = true;
+                for (let uniqueEdge of uniqueEdges) {
+                    if (this.edgeEquals(edge, uniqueEdge)) {
+                        uniqueEdges.delete(uniqueEdge)
+                        unique = false;
+                        break;
+                    }
+                }
+                if(unique) {
+                    uniqueEdges.add(edge);
+                }
+            }
+        }
+        //remove bad triangles
+        this.mesh = this.mesh.difference(badTriangles);
         //form triangles from the edges + the new point
+        for (let edge of uniqueEdges) {
+            let [a, b] = edge;
+            this.addTri(a, b, npi)
+        }
+        console.log("New Triangles");
+        console.log(this.mesh);
     }
-
     
-    drawTriangle(tri) {
-        stroke(250, 225, 20);
+    drawTriangle(tri, edgeColor) {
+        stroke(edgeColor);
+        strokeWeight(3);
         noFill();
         let [a, b, c] = tri
         let [i, j, k] = this.triToPoints(a, b, c);
         let [x1, y1] = i;
         let [x2, y2] = j;
         let [x3, y3] = k;
-        triangle(x1, y1, x2, y2, x3, y3);
+        triangle(x1 * 10, y1 * 10, x2 * 10, y2 * 10, x3 * 10, y3 * 10);
     }
 
-    drawTriMesh() {
+    drawTriMesh(edgeColor) {
         if(this.mesh.size == 0) {
             return;
         }
         for (let tri of this.mesh) {
-            this.drawTriangle(tri);
+            this.drawTriangle(tri, edgeColor);
         }
     }
 }
