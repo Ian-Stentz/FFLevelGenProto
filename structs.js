@@ -57,7 +57,7 @@ class TriMesh {
 
     triEdges(tri) {
         let [a, b, c] = tri;
-        return [[a, b], [b, c], [a, c]];
+        return [[a, b], [b, c], [c, a]];
     }
 
     edgeEquals(edgeA, edgeB) {
@@ -86,14 +86,12 @@ class TriMesh {
     }
 
     toAdjList(adjList) {
-        let outAdjList = new adjacencyList(this.pointList);
         for (let tri of this.mesh) {
             let [a, b, c] = tri;
-            outAdjList.makeUndirectedEdge(a, b);
-            outAdjList.makeUndirectedEdge(b, c);
-            outAdjList.makeUndirectedEdge(a, c);
+            adjList.makeUndirectedEdge(a, b);
+            adjList.makeUndirectedEdge(b, c);
+            adjList.makeUndirectedEdge(a, c);
         }
-        return outAdjList;
     }
 
     //add Delaunay Point

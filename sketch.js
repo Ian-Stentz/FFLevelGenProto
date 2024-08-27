@@ -163,6 +163,13 @@ function setup() {
   generateRects();
   frameRate(30);
   delaunayMesh.addSuperTri(gx, gy, cs * rws, cs * cms);
+  let midPoints = [];
+  for (let point of points) {
+    midPoints.push(tileToMP(point[0], point[1]));
+  }
+  //console.log(points);
+  //console.log(midPoints);
+  adjList = new adjacencyList(midPoints);
   //delaunayTriangulation();
   console.log(points);
   //console.log(rects);
@@ -198,6 +205,8 @@ function keyPressed() {
     } else if(!badTrisRemoved) {
       delaunayMesh.removeSuperTri();
       badTrisRemoved = true;
+      delaunayMesh.toAdjList(adjList);
+      adjList.printAdjList();
     }
   }
 }
@@ -217,8 +226,12 @@ function draw() {
     drawPoint(xi, yi, i);
   }
   drawRects();
-  
-  delaunayMesh.drawTriMesh(edgeColor);
+  if(!badTrisRemoved) {
+    delaunayMesh.drawTriMesh(edgeColor);
+  }
+  else {
+    adjList.drawAdjList(edgeColor, 2.5);
+  }
 
   // for(myPoint of ptCruise) {
   //   let [x, y] = myPoint;
