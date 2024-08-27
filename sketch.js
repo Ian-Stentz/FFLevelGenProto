@@ -192,6 +192,7 @@ function setup() {
 
 function update(delta) {
   totalTime += delta;
+  console.log(delta);
 }
 
 let ticker = 0;
@@ -207,6 +208,11 @@ function keyPressed() {
       badTrisRemoved = true;
       delaunayMesh.toAdjList(adjList);
       adjList.printAdjList();
+    } else {
+      //Two forces to account for: Spring forces and collision forces
+      //Spring forces will be calculated using a map of edges to equilibrium weight, and then weight will be calculated frame-by-frame until equilibrium is reached (might need drag to help). F = -k*dx (equilibrium length - current length in the direction towards equilibrium) 
+      //Collision forces will be calculated by checking collisions between boxes and from boxes to walls. Momentum gained from this force will have to be tracked, so it can be cancelled completely upon collision ending. Or, simply cancel the velocity component in the direction out from the wall
+      //Then it's just a matter of using the free body diagram of each box to apply a force to itself, iterating over all the boxes, and then applying drag & force cancellation, repeating until the system reaches equilibrium (?) if it takes longer than (some time), cancel the operation and [regenerate]
     }
   }
 }
