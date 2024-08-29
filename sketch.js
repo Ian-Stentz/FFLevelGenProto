@@ -191,8 +191,8 @@ function setup() {
 }
 
 function update(delta) {
-  totalTime += delta;
-  console.log(delta);
+  totalTime += delta/1000;
+  //console.log(delta/1000);
 }
 
 let ticker = 0;
