@@ -30,7 +30,9 @@ function proposePoint() {
 function generatePoints() {
   for (let n = 0; n < ptAmnt; n++) {
     let [i, j] = proposePoint();
+    let success;
     for (let k = 0; k < 5; k++) {
+      success = true;
       for (let point of points) {
         let ii = point[0];
         let jj = point[1];
@@ -38,8 +40,12 @@ function generatePoints() {
           let pNew = proposePoint(); 
           i = pNew[0];
           j = pNew[1];
+          success = false;
           break;
         }
+      }
+      if(success) {
+        break;
       }
     }
     points.push([i,j]);
@@ -66,7 +72,7 @@ function generateRects() {
   for (let n = 0; n < ptAmnt; n++) {
     let width = Math.floor(Math.random() * (maxRadius) * 2) + 1;
     let height = Math.floor(Math.random() * (maxRadius) * 2) + 1;
-    rects[n] = [Math.ceil(width/2), Math.ceil(height/2), Math.floor(width/2), Math.floor(height/2)]
+    rects.push([Math.ceil(width/2), Math.ceil(height/2), Math.floor(width/2), Math.floor(height/2)]);
   }
 }
 
@@ -98,15 +104,6 @@ function drawPoint(x, y, i = -1) {
   }
   circle(x, y, 7);
 }
-
-// function drawRandColorRect(x1, y1, x2, y2) {
-//   noFill();
-//   let r = Math.random() * 256;
-//   let g = Math.random() * 256;
-//   let b = Math.random() * 256;
-//   stroke(r, g, b);
-//   rect(x1, y1, x2-x1, y2-y1);
-// }
 
 function drawRects() {
   noFill();
@@ -140,17 +137,6 @@ function tileToMP(i, j) {
   return [x, y] = locToMP(xi, yi);
 }
 
-// function delaunayTriangulation() {
-//   let newPoints = [];
-//   for (let [x, y] of points) {
-//     newPoints.push(tileToMP(x, y));
-//   }
-//   triMesh = new TriMesh(newPoints);
-//   //triMesh.addTri(0, 1, 2);
-//   adjList = triMesh.toAdjList();
-//   adjList.printAdjList();
-// }
-
 let ptCruise = [];
 let aTri = [];
 let bTri = [];
@@ -167,27 +153,8 @@ function setup() {
   for (let point of points) {
     midPoints.push(tileToMP(point[0], point[1]));
   }
-  //console.log(points);
-  //console.log(midPoints);
   adjList = new adjacencyList(midPoints);
-  //delaunayTriangulation();
   console.log(points);
-  //console.log(rects);
-
-  // for (let i = 0; i < 10000; i++) {
-  //   ptCruise.push([Math.random() * cw * 2 - cw, Math.random() * ch * 2 - ch]);
-  // }
-  
-  // for (let i = 0; i < 3; i++) {
-  //   aTri.push([Math.random() * cw * 2 - cw, Math.random() * ch * 2 - ch]);
-  // }
-  // for (let i = 0; i < 3; i++) {
-  //   bTri.push([Math.random() * cw * 2 - cw, Math.random() * ch * 2 - ch]);
-  // }
-  // for (let i = 0; i < 3; i++) {
-  //   cTri.push([Math.random() * cw * 2 - cw, Math.random() * ch * 2 - ch]);
-  // }
-  // console.log(aTri);
 }
 
 function update(delta) {
@@ -210,7 +177,7 @@ function keyPressed() {
       adjList.printAdjList();
     } else {
       //Two forces to account for: Spring forces and collision forces
-      //Spring forces will be calculated using a map of edges to equilibrium weight, and then weight will be calculated frame-by-frame until equilibrium is reached (might need drag to help). F = -k*dx (equilibrium length - current length in the direction towards equilibrium) 
+      //Spring forces will be calculated using a map of edges to equilibrium weight, and then weight will be calculated frame-by-frame until equilibrium is reached (might need drag to help). F = -k*dx (equilibrium length - current length; in the direction towards equilibrium) 
       //Collision forces will be calculated by checking collisions between boxes and from boxes to walls. Momentum gained from this force will have to be tracked, so it can be cancelled completely upon collision ending. Or, simply cancel the velocity component in the direction out from the wall
       //Then it's just a matter of using the free body diagram of each box to apply a force to itself, iterating over all the boxes, and then applying drag & force cancellation, repeating until the system reaches equilibrium (?) if it takes longer than (some time), cancel the operation and [regenerate]
     }
@@ -223,7 +190,7 @@ function draw() {
   noFill();
   stroke("black");
   strokeWeight(1);
-  let edgeColor = color(250, 210, 10)
+  let edgeColor = color(235, 180, 10)
 
   drawGrid(gx, gy, cs, rws, cms);
   for (let i = 0; i < ptAmnt; i++) {
@@ -238,50 +205,4 @@ function draw() {
   else {
     adjList.drawAdjList(edgeColor, 2.5);
   }
-
-  // for(myPoint of ptCruise) {
-  //   let [x, y] = myPoint;
-  //   let color = 0;
-  //   let [aa, ba, ca] = aTri;
-  //   let [ab, bb, cb] = bTri;
-  //   let [ac, bc, cc] = cTri;
-  //   if(inCircumcircle(aa, ba, ca, myPoint)) {
-  //     color += 1
-  //   }
-  //   if(inCircumcircle(ab, bb, cb, myPoint)) {
-  //     color += 2
-  //   }
-  //   if(inCircumcircle(ac, bc, cc, myPoint)) {
-  //     color += 4
-  //   }
-  //   drawPoint((x + cw) / 2, (y + ch) / 2, color);
-  // }
-  // stroke(0, 0, 0);
-  // noFill();
-  // strokeWeight(5);
-  // let [a, b, c] = aTri;
-  // let [ax, ay] = a;
-  // let [bx, by] = b;
-  // let [cx, cy] = c;
-  // triangle((ax + cw) / 2, (ay + ch) / 2, (bx + cw) / 2, (by + ch) / 2, (cx + cw) / 2, (cy + ch) / 2);
-  // [a, b, c] = bTri;
-  // [ax, ay] = a;
-  // [bx, by] = b;
-  // [cx, cy] = c;
-  // triangle((ax + cw) / 2, (ay + ch) / 2, (bx + cw) / 2, (by + ch) / 2, (cx + cw) / 2, (cy + ch) / 2);
-  // [a, b, c] = cTri;
-  // [ax, ay] = a;
-  // [bx, by] = b;
-  // [cx, cy] = c;
-  // triangle((ax + cw) / 2, (ay + ch) / 2, (bx + cw) / 2, (by + ch) / 2, (cx + cw) / 2, (cy + ch) / 2);
-
-  //triMesh.drawTriMesh(edgeColor);
-  //adjList.drawAdjList(edgeColor, 1);
-  // let u = tileToLoc(6, 7);
-  // let v = tileToLoc(1, 3);
-  // let a = u[0];
-  // let b = u[1];
-  // let c = v[0];
-  // let d = v[1];
-  // drawRandColorRect(a,b,c,d)
 }
