@@ -20,7 +20,7 @@ class Grid {
 
   proposePoint() {
     let MR = this.minRadius
-    return [i, j] = [Math.floor(Math.random() * (this.columns - 2 * MR)) + MR, Math.floor(Math.random() * (this.rows - 2 * MR)) + MR];
+    return [Math.floor(Math.random() * (this.columns - 2 * MR)) + MR, Math.floor(Math.random() * (this.rows - 2 * MR)) + MR];
   }
 
   placePoints(ptAmnt) {
@@ -29,7 +29,7 @@ class Grid {
       let success;
       for (let k = 0; k < 5; k++) {
       success = true;
-        for (let point of this.points) {
+        for (let point of this.ptList) {
           let ii = point[0];
           let jj = point[1];
           if(dist2(i, j, ii, jj) <= this.minRadius) {
@@ -44,7 +44,7 @@ class Grid {
           break;
         }
       }
-      this.points.push([i,j]);
+      this.ptList.push([i,j]);
     }
   }
 
@@ -71,16 +71,16 @@ class Grid {
   }
 
   tileToLoc(i, j) {
-    return [x, y] = [this.xOffset + this.cellSize * i, this.yOffset + this.cellSize * (this.rows - j)];
+    return [this.xOffset + this.cellSize * i, this.yOffset + this.cellSize * (this.rows - j)];
   }
   
   locToMP(i, j) {
-    return [x, y] = [i + this.cellSize / 2, j - this.cellSize / 2]
+    return [i + this.cellSize / 2, j - this.cellSize / 2]
   }
   
   tileToMP(i, j) {
-    [xi, yi] = tileToLoc(i, j);
-    return [x, y] = locToMP(xi, yi);
+    let [xi, yi] = this.tileToLoc(i, j);
+    return this.locToMP(xi, yi);
   }
   
   //draws a grid with upper left corner at (startx,starty) with a cell size of cell and with "rows" amount of rows and "columns" amount of columns
@@ -105,7 +105,7 @@ class Grid {
       stroke("black");
       fill("black");
     } else {
-      [r, g, b] = this.colors[i];
+      let [r, g, b] = this.colors[i];
       stroke(r, g, b);
       fill(r, g, b);
     }
@@ -114,8 +114,9 @@ class Grid {
 
   drawPoints() {
     for (let i = 0; i < this.numPoints(); i++) {
-      let [x, y] = this.points[i];
-      drawPoint(x, y, i)
+      let [x, y] = this.ptList[i];
+      let [a, b] = this.tileToMP(x, y)
+      this.drawPoint(a, b, i)
     }
   }
 
@@ -125,7 +126,7 @@ class Grid {
       let [cr, cg, cb] = this.colors[i];
       stroke(cr, cg, cb);
       strokeWeight(4);
-      let pt = this.points[i];
+      let pt = this.ptList[i];
       let myRect = this.rects[i];
       let xr = pt[0] + myRect[0];
       let yu = pt[1] + myRect[1];
