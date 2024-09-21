@@ -48,6 +48,35 @@ class Grid {
     }
   }
 
+  tileToLoc(i, j) {
+    return [this.xOffset + this.cellSize * i, this.yOffset + this.cellSize * (this.rows - j)];
+  }
+  
+  locToMP(i, j) {
+    return [i + this.cellSize / 2, j - this.cellSize / 2]
+  } 
+  
+  tileToMP(i, j) {
+    let [xi, yi] = this.tileToLoc(i, j);
+    return this.locToMP(xi, yi);
+  }
+  
+  getBoundpoints() {
+    let Boundpoints = [];
+    for (let point of this.ptList) {
+      Boundpoints.push(this.tileToLoc(point[0], point[1]));
+    }
+    return Boundpoints;
+  }
+
+  getMidpoints() {
+    let Midpoints = [];
+    for (let point of this.ptList) {
+      Midpoints.push(this.tileToMP(point[0], point[1]));
+    }
+    return Midpoints;
+  }
+
   selectColors() {
     for (let n = 0; n < this.numPoints(); n++) {
       let r = Math.random() * 256;
@@ -62,6 +91,7 @@ class Grid {
     }
   }
 
+  //Order is RULD (radial)  UP is +y in this
   makeRectangles() {
     for (let n = 0; n < this.numPoints(); n++) {
       let width = Math.floor(Math.random() * (this.maxRadius) * 2) + 1;
@@ -70,19 +100,6 @@ class Grid {
     }
   }
 
-  tileToLoc(i, j) {
-    return [this.xOffset + this.cellSize * i, this.yOffset + this.cellSize * (this.rows - j)];
-  }
-  
-  locToMP(i, j) {
-    return [i + this.cellSize / 2, j - this.cellSize / 2]
-  }
-  
-  tileToMP(i, j) {
-    let [xi, yi] = this.tileToLoc(i, j);
-    return this.locToMP(xi, yi);
-  }
-  
   //draws a grid with upper left corner at (startx,starty) with a cell size of cell and with "rows" amount of rows and "columns" amount of columns
   drawGrid() {
     strokeWeight(1);
@@ -112,11 +129,19 @@ class Grid {
     circle(x, y, 7);
   }
 
-  drawPoints() {
+  drawMidpoints() {
     for (let i = 0; i < this.numPoints(); i++) {
       let [x, y] = this.ptList[i];
       let [a, b] = this.tileToMP(x, y)
       this.drawPoint(a, b, i)
+    }
+  }
+
+  drawBoundpoints() {
+    let Boundpoints = this.getBoundpoints();
+    for (let i = 0; i < this.numPoints(); i++) {
+      let [x, y] = Boundpoints[i];
+      this.drawPoint(x, y, i)
     }
   }
 

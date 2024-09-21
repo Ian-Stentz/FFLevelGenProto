@@ -1,13 +1,14 @@
+// Grid bounds order is RULD (radial)
 class FreeBodyDiagram {
-    constructor(ptList, rectList, adjArray, xL, xR, yD, yU, sprCst = 6) {
+    constructor(ptList, rectList, adjArray, gridBounds, sprCst = 6) {
         this.ptList = ptList;
         this.rectList = rectList;
         this.adjArray = adjArray;
         this.sprCst = sprCst;
-        this.xL = xL;
-        this.xR = xR;
-        this.yD = yD;
-        this.yU = yU;
+        this.xR = gridBounds[0];
+        this.yU = gridBounds[1];
+        this.xL = gridBounds[2];
+        this.yD = gridBounds[3];
 
         this.forceLists = [];
         this.velocityList = [];
@@ -18,7 +19,10 @@ class FreeBodyDiagram {
     }
 
     checkWallCollision(i) {
-
+        let pt = this.ptList[i];
+        let ptX = pt[0];
+        let ptY = pt[1];
+        let rect = this.rectList[i];
     }
 
     checkBoxCollision() {
