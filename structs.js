@@ -1,6 +1,29 @@
 function dist2(x1, y1, x2, y2) {
     return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
   }
+  
+function vectAdd(vect1, vect2) {
+    return [vect1[0] + vect2[0], vect1[1] + vect2[1]];
+}
+
+function vectMultiply(vect1, vect2) {
+    return [vect1[0] * vect2[0], vect1[1] * vect2[1]];
+}
+
+function vectScale(scalar, vect) {
+    return [vect[0] * scalar, vect[1] * scalar];
+}
+
+function vectNormalize(vect) {
+    let magnitude = dist2(0, 0, vect[0], vect[1]);
+    return vectScale(1/magnitude, vect);
+}
+
+function vect2isZero(vect2) {
+    let x = vect2[0];
+    let y = vect2[1];
+    return x == 0 && y == 0;
+}
 
 class TriMesh {
     constructor(points = []) {
