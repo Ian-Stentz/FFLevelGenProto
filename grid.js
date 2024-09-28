@@ -61,9 +61,15 @@ class Grid {
     return this.locToMP(xi, yi);
   }
   
-  getBoundpoints() {
+  getBoundpoints(overridePts = []) {
     let Boundpoints = [];
-    for (let point of this.ptList) {
+    let myList;
+    if(overridePts.length == 0) {
+      myList = this.ptList;
+    } else {
+      myList = overridePts;
+    }
+    for (let point of myList) {
       Boundpoints.push(this.tileToLoc(point[0], point[1]));
     }
     return Boundpoints;
@@ -136,22 +142,33 @@ class Grid {
       this.drawPoint(a, b, i)
     }
   }
-
-  drawBoundpoints() {
-    let Boundpoints = this.getBoundpoints();
+  //override option for physics sim?
+  drawBoundpoints(overridePts = []) {
+    let Boundpoints;
+    if (overridePts.length == 0) {
+      Boundpoints = this.getBoundpoints();
+    } else {
+      Boundpoints = this.getBoundpoints(overridePts);
+    }
     for (let i = 0; i < this.numPoints(); i++) {
       let [x, y] = Boundpoints[i];
       this.drawPoint(x, y, i)
     }
   }
-
-  drawRects() {
+  //override option for physics sim?
+  drawRects(overridePts = []) {
     noFill();
+    let myList;
+    if(overridePts.length == 0) {
+      myList = this.ptList;
+    } else {
+      myList = overridePts;
+    }
     for (let i = 0; i < this.numPoints(); i++) {
       let [cr, cg, cb] = this.colors[i];
       stroke(cr, cg, cb);
       strokeWeight(4);
-      let pt = this.ptList[i];
+      let pt = myList[i];
       let myRect = this.rects[i];
       let xr = pt[0] + myRect[0];
       let yu = pt[1] + myRect[1];

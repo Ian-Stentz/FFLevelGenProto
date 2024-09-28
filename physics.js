@@ -1,8 +1,9 @@
 // Collision info
 class CollisionData {
-    constructor(colliding, normal) {
+    constructor(colliding, normal, newCollision = false) {
         this.colliding = colliding
         this.normal = normal
+        this.newCollsion = newCollision
     }
 }
 
@@ -24,24 +25,13 @@ class FreeBodyDiagram {
         this.forceLists = [];
         this.velocityList = [];
 
-        this.currentlyOverlappedWalls = [];
-        this.currentlyOverlappedBoxes = [];
-
         this.initPhysicsArrays();
-        this.initCurrentlyOverlapped();
     }
 
     initPhysicsArrays() {
         for (let i = 0; i < this.numPoints(); i++) {
             this.forceLists.push([]);
             this.velocityList.push([0, 0]);
-        }
-    }
-
-    initCurrentlyOverlapped() {
-        for (let i = 0; i < this.numPoints(); i++) {
-            this.currentlyOverlappedWalls.push([]);
-            this.currentlyOverlappedBoxes.push([]);
         }
     }
 
@@ -70,34 +60,61 @@ class FreeBodyDiagram {
         return [rectR, rectU, rectL, rectD];
     }
 
-    checkWallCollision(i) {
+    checkWallCollision(i, newPointi = []) {
         let rectBounds = this.getRectBoundsIndex(i);
-        let isColliding = false;
+        let iColliding = false;
         let normal = [0,0];
         if (rectBounds[0] > this.gridR) {
-            isColliding = true;
+            iColliding = true;
             normal = vectAdd(normal, [1,0]);
         }
         if (rectBounds[1] > this.gridR) {
-            isColliding = true;
+            iColliding = true;
             normal = vectAdd(normal, [0,1]);
         }
         if (rectBounds[2] < this.gridR) {
-            isColliding = true;
+            iColliding = true;
             normal = vectAdd(normal, [-1,0]);
         }
         if (rectBounds[3] < this.gridR) {
-            isColliding = true;
+            iColliding = true;
             normal = vectAdd(normal, [0,-1]);
         }
-        normal = vectNormalize(normal);
-        return new CollisionData(isColliding, normal);
+        if(newPointi.length == 0) {
+            normal = vectNormalize(normal);
+            return new CollisionData(iColliding, normal, false);
+        } else {
+            let newBounds = this.getRectBoundsPoint(i, newPointi);
+            let newColliding = false;
+            normal = [0,0];
+            if (newBounds[0] > this.gridR) {
+                newColliding = true;
+                normal = vectAdd(normal, [1,0]);
+            }
+            if (newBounds[1] > this.gridR) {
+                newColliding = true;
+                normal = vectAdd(normal, [0,1]);
+            }
+            if (newBounds[2] < this.gridR) {
+                newColliding = true;
+                normal = vectAdd(normal, [-1,0]);
+            }
+            if (newBounds[3] < this.gridR) {
+                newColliding = true;
+                normal = vectAdd(normal, [0,-1]);
+            }
+            normal = vectNormalize(normal);
+            let beginOverlap = newColliding && !iColliding;
+            return new CollisionData(newColliding, normal, beginOverlap);
+        }
     }
 
     //checks if i is colliding j and returns the normal of j onto i (iorigin - jorigin or the vector pointing from j's origin to i's origin)
     //uses newPointi to test collision if the point were to move to newPointi's location
     checkBoxCollision(i, j, newPointi = []) {
         let pti;
+        let oldColliding = false;
+        //TODO rework: if newPointi provided, check if newPoint is colliding
         if(newPointi.length == 0) {
             pti = this.ptList[i];
         } else [
@@ -128,6 +145,26 @@ class FreeBodyDiagram {
         if(colliding) {
             normal = pti - ptj;
             normal = vectNormalize(normal);
+        }
+        if(newPointi.length != 0) {
+            let rectBoundsOld = this.getRectBoundsIndex(i);
+            if(rectBoundsOld[0] > rectBoundsj[2]) {
+                oldColliding = true;
+            }
+            //I up is over J down edge
+            if(rectBoundsOld[1] > rectBoundsj[3]) {
+                oldColliding = true;
+            }
+            //I left is over J right edge
+            if(rectBoundsOld[2] < rectBoundsj[0]) {
+                oldColliding = true;
+            }
+            //I down is over J up edge
+            if(rectBoundsOld[3] < rectBoundsj[1]) {
+                oldColliding = true;
+            }
+            let beginOverlap = colliding && !oldColliding
+            return new CollisionData(colliding, normal, beginOverlap);
         }
         return new CollisionData(colliding, normal);
     }
@@ -184,7 +221,7 @@ class FreeBodyDiagram {
         this.springForces();
     }
 
-    calculateVelocities() {
+    calculateVelocities(dT) {
         //add wall forces if wall forces found a collision
         //REVISED: add wall forces to effective velocities during UPDATEPOSITIONS, remove from here!!!
         // let results = this.wallForces();
@@ -195,6 +232,14 @@ class FreeBodyDiagram {
         //     }
         // }
         //add spring forces from this.forcelists
+        for(let i = 0; i < this.numPoints(); i++) {
+            let forces = this.forceLists[i];
+            for (let j = 0; j < forces.length; j++) {
+                let force = forces[j];
+                let dV = vectScale(dT, force);
+                this.velocityList[i] = vectAdd(this.velocityList[i], dV);
+            }
+        }
     }
 
     updatePositions(dT) {
@@ -207,7 +252,7 @@ class FreeBodyDiagram {
         }
     }
 
-    applyDrag() {
+    applyDrag(dT) {
         for (let i = 0; i < this.velocityList.length; i++) {
             let vel = this.velocityList[i];
             this.velocityList[i] = vectScale(drag, vel);
@@ -217,8 +262,17 @@ class FreeBodyDiagram {
     runSimulation(deltaTime) {
         //first calc forces, then velocity, then update positions, then apply drag
         this.calculateForces();
-        this.calculateVelocities();
+        this.calculateVelocities(deltaTime);
         this.updatePositions(deltaTime);
-        this.applyDrag();
+        this.applyDrag(deltaTime);
+    }
+
+    roundPoints() {
+        //TODO;
+        return;
+    }
+
+    stopSimulation() {
+        this.roundPoints();
     }
 }
