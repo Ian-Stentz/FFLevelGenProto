@@ -114,7 +114,6 @@ class FreeBodyDiagram {
     checkBoxCollision(i, j, newPointi = []) {
         let pti;
         let oldColliding = false;
-        //TODO rework: if newPointi provided, check if newPoint is colliding
         if(newPointi.length == 0) {
             pti = this.ptList[i];
         } else [
@@ -248,7 +247,21 @@ class FreeBodyDiagram {
             let vel = this.velocityList[i];
             let pos = this.ptList[i];
             //TODO: prevent it from moving into a collision, if it was not already
-            this.ptList[i] = vectAdd(pos, vectScale(dT, vel));
+            //First check for wall collision (and move against wall?)
+            //Then check other box collisions
+            //this.ptList[i] = vectAdd(pos, vectScale(dT, vel));
+            let proposeMove = vectAdd(pos, vectScale(dT, vel));
+            let checkWall = this.checkWallCollision(i, proposeMove);
+            if(checkWall.colliding && checkWall.newCollsion) {
+                //TODO
+
+            }
+            for (let adjacency of this.adjArray[i]) {
+                let checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
+                if(checkBoxCollision.colliding && checkBoxCollision.newCollsion) {
+                    //TODO
+                }
+            }
         }
     }
 
