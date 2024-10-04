@@ -199,6 +199,10 @@ class adjacencyList {
         }
     }
 
+    setPointList(pointList) {
+        this.pointList = pointList;
+    }
+
     //from a to b
     makeDirectedEdge(a, b) {
         if(!this.adjacencyList[a].includes(b)) {

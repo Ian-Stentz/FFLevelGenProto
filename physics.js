@@ -253,13 +253,25 @@ class FreeBodyDiagram {
             let proposeMove = vectAdd(pos, vectScale(dT, vel));
             let checkWall = this.checkWallCollision(i, proposeMove);
             if(checkWall.colliding && checkWall.newCollsion) {
-                //TODO
-
+                //TODO: manual calculation
+                if(checkWall.normal[1] > 0) {
+                    
+                }
+                if(checkWall.normal[0] > 0) {
+                    
+                }
+                if(checkWall.normal[1] < 0) {
+                    
+                }
+                if(checkWall.normal[0] < 0) {
+                    
+                }
             }
             for (let adjacency of this.adjArray[i]) {
                 let checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
                 if(checkBoxCollision.colliding && checkBoxCollision.newCollsion) {
-                    //TODO
+                    //TODO: for loop?
+
                 }
             }
         }
