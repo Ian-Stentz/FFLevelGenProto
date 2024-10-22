@@ -75,6 +75,10 @@ class Grid {
     return Boundpoints;
   }
 
+  saveBoundpoints(emptyArray) {
+    emptyArray = this.getBoundpoints().map((x) => x);
+  }
+
   getMidpoints() {
     let Midpoints = [];
     for (let point of this.ptList) {

@@ -55,10 +55,10 @@ function inCircumcircle(A, B, C, D) {
                     [bdx, bdy, (bdx * bdx) + (bdy * bdy)],
                     [cdx, cdy, (cdx * cdx) + (cdy * cdy)]];
     let det = determinant(myMatrix, 3);
-    console.log("DET:")
-    console.log(myMatrix);
+    //console.log("DET:")
+    //console.log(myMatrix);
     //console.log(A, B, C, D);
-    console.log(det);
+    //console.log(det);
     return det > 0;
 }
 

@@ -111,9 +111,11 @@ class FreeBodyDiagram {
 
     //checks if i is colliding j and returns the normal of j onto i (iorigin - jorigin or the vector pointing from j's origin to i's origin)
     //uses newPointi to test collision if the point were to move to newPointi's location
+
+    //TODO: FIX COMPLETELY!
     checkBoxCollision(i, j, newPointi = []) {
         let pti;
-        let oldColliding = false;
+        let oldColliding = true;
         if(newPointi.length == 0) {
             pti = this.ptList[i];
         } else [
@@ -122,23 +124,23 @@ class FreeBodyDiagram {
         let ptj = this.ptList[j];
         let rectBoundsi = this.getRectBoundsPoint(i, pti);
         let rectBoundsj = this.getRectBoundsIndex(j);
-        let colliding = false;
+        let colliding = true;
         //I know the way it's currently implemented doesn't take advantage of the seperate cases, but it might eventually sooo
         //I right is over J left edge
-        if(rectBoundsi[0] > rectBoundsj[2]) {
-            colliding = true;
+        if(rectBoundsi[0] < rectBoundsj[2]) {
+            colliding = false;
         }
         //I up is over J down edge
-        if(rectBoundsi[1] > rectBoundsj[3]) {
-            colliding = true;
+        if(rectBoundsi[1] < rectBoundsj[3]) {
+            colliding = false;
         }
         //I left is over J right edge
-        if(rectBoundsi[2] < rectBoundsj[0]) {
-            colliding = true;
+        if(rectBoundsi[2] > rectBoundsj[0]) {
+            colliding = false;
         }
         //I down is over J up edge
-        if(rectBoundsi[3] < rectBoundsj[1]) {
-            colliding = true;
+        if(rectBoundsi[3] > rectBoundsj[1]) {
+            colliding = false;
         }
         let normal = [0, 0];
         if(colliding) {
@@ -147,20 +149,20 @@ class FreeBodyDiagram {
         }
         if(newPointi.length != 0) {
             let rectBoundsOld = this.getRectBoundsIndex(i);
-            if(rectBoundsOld[0] > rectBoundsj[2]) {
-                oldColliding = true;
+            if(rectBoundsOld[0] < rectBoundsj[2]) {
+                oldColliding = false;
             }
             //I up is over J down edge
-            if(rectBoundsOld[1] > rectBoundsj[3]) {
-                oldColliding = true;
+            if(rectBoundsOld[1] < rectBoundsj[3]) {
+                oldColliding = false;
             }
             //I left is over J right edge
-            if(rectBoundsOld[2] < rectBoundsj[0]) {
-                oldColliding = true;
+            if(rectBoundsOld[2] > rectBoundsj[0]) {
+                oldColliding = false;
             }
             //I down is over J up edge
-            if(rectBoundsOld[3] < rectBoundsj[1]) {
-                oldColliding = true;
+            if(rectBoundsOld[3] > rectBoundsj[1]) {
+                oldColliding = false;
             }
             let beginOverlap = colliding && !oldColliding
             return new CollisionData(colliding, normal, beginOverlap);
@@ -251,45 +253,51 @@ class FreeBodyDiagram {
             //Then check other box collisions
             //this.ptList[i] = vectAdd(pos, vectScale(dT, vel));
             let proposeMove = vectAdd(pos, vectScale(dT, vel));
+            //console.log(pos);
+            //console.log(vectScale(dT, vel));
             let checkWall = this.checkWallCollision(i, proposeMove);
-            if(checkWall.colliding && checkWall.newCollsion) {
-                //TODO: manual calculation
-                if(checkWall.normal[1] > 0) {
+            // if(checkWall.colliding && checkWall.newCollsion) {
+            //     //TODO: manual calculation
+            //     if(checkWall.normal[0] > 0) {
                     
-                }
-                if(checkWall.normal[0] > 0) {
+            //     }
+            //     if(checkWall.normal[1] > 0) {
                     
-                }
-                if(checkWall.normal[1] < 0) {
+            //     }
+            //     if(checkWall.normal[0] < 0) {
                     
-                }
-                if(checkWall.normal[0] < 0) {
+            //     }
+            //     if(checkWall.normal[1] < 0) {
                     
-                }
-            }
-            for (let adjacency of this.adjArray[i]) {
-                let checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
-                if(checkBoxCollision.colliding && checkBoxCollision.newCollsion) {
-                    //TODO: for loop?
+            //     }
+            // }
+            // for (let adjacency of this.adjArray[i]) {
+            //     let checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
+            //     if(checkBoxCollision.colliding && checkBoxCollision.newCollsion) {
+            //         //TODO: for loop?
 
-                }
-            }
+            //     }
+            // }
+            this.ptList[i] = proposeMove;
         }
     }
 
     applyDrag(dT) {
         for (let i = 0; i < this.velocityList.length; i++) {
             let vel = this.velocityList[i];
-            this.velocityList[i] = vectScale(drag, vel);
+            this.velocityList[i] = vectScale(this.drag, vel);
         }
     }
 
+    //notes: Should be done on fixed time, Rooms should be stored figruatively as "objects"
     runSimulation(deltaTime) {
+        //console.log(this.ptList);
         //first calc forces, then velocity, then update positions, then apply drag
         this.calculateForces();
         this.calculateVelocities(deltaTime);
         this.updatePositions(deltaTime);
         this.applyDrag(deltaTime);
+        //console.log(this.ptList);
     }
 
     roundPoints() {
@@ -298,6 +306,6 @@ class FreeBodyDiagram {
     }
 
     stopSimulation() {
-        this.roundPoints();
+        //this.roundPoints();
     }
 }

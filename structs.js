@@ -128,17 +128,17 @@ class TriMesh {
         let badTriangles = new Set()
         for (let tri of this.mesh) {
             let [a, b, c] = tri;
-            console.log(a, b, c, npi);
+            //console.log(a, b, c, npi);
             let [i, j, k] = this.triToPoints(a, b, c);
-            console.log(i, j, k, newPointMod);
+            //console.log(i, j, k, newPointMod);
             if(inCircumcircle(i, j, k, newPointMod)) {
                 badTriangles.add(tri);
             }
         }
         //find edges shared by no other bad triangle
         let badTriArray = Array.from(badTriangles);
-        console.log("BAD TRIANGLES:")
-        console.log(badTriArray);
+        //console.log("BAD TRIANGLES:")
+        //console.log(badTriArray);
         //keep track of unique edges and shared edges
         let uniqueEdges = new Set();
         for (let i = 0; i < badTriArray.length; i++) {
@@ -164,8 +164,8 @@ class TriMesh {
             let [a, b] = edge;
             this.addTri(a, b, npi)
         }
-        console.log("New Triangles");
-        console.log(this.mesh);
+        //console.log("New Triangles");
+        //console.log(this.mesh);
     }
     
     drawTriangle(tri, edgeColor) {
@@ -226,19 +226,19 @@ class adjacencyList {
     }
     
     printAdjList() {
-        console.log("Point List:")
+        //console.log("Point List:")
         for (let i = 0; i < this.pointList.length; i++) {
             let [x, y] = this.pointList[i];
-            console.log(`${i}: (${x}, ${y})`);
+            //console.log(`${i}: (${x}, ${y})`);
         }
-        console.log("Adj List:")
+        //console.log("Adj List:")
         for (let from = 0; from < this.adjacencyList.length; from++) {
             let string = `${from}: `
             for(let to of this.adjacencyList[from]) {
                 string += `${to}, `
             }
             string = string.slice(0, string.lastIndexOf(", "));
-            console.log(string);
+            //console.log(string);
         }
     }
 

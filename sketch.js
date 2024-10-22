@@ -16,24 +16,28 @@ function setup() {
   // generatePoints();
   // generateColors();
   // generateRects();
-  console.log(myGrid.ptList);
+  // console.log(myGrid.ptList);
   frameRate(30);
   delaunayMesh.addSuperTri(myGrid.xOffset, myGrid.yOffset, myGrid.cellSize * myGrid.rows, myGrid.cellSize * myGrid.columns);
   adjList = new adjacencyList(myGrid.getBoundpoints());
-  console.log(myGrid.ptList);
+  //console.log(myGrid.ptList);
 }
 
 function myUpdate(delta) {
   totalTime += delta/1000;
   //console.log(delta/1000);
+  if(runningSimulation) {
+    physicsObj.runSimulation(delta);
+  }
 }
 
 let ticker = 0;
 let badTrisRemoved = false
+let runningSimulation = false
 function keyPressed() {
   if (key === " ") {
     let action = actionQueue.shift()
-    console.log(actionQueue)
+    //console.log(actionQueue)
     switch(action) {
       case "Delaunay":
         for (let point of myGrid.getBoundpoints()) {
@@ -44,9 +48,22 @@ function keyPressed() {
         break;
       case "EnablePhysics":
         let bounds = [myGrid.xOffset + myGrid.cellSize * myGrid.rows, myGrid.yOffset + myGrid.cellSize + myGrid.columns, myGrid.xOffset, myGrid.yOffset];
-        physicsObj = new FreeBodyDiagram(myGrid.getBoundpoints(), myGrid.rects, adjList.adjList, bounds, 6);
+        let pts = []
+        for (let point of myGrid.getBoundpoints()) {
+          console.log(point);
+          let x = point[0];
+          let y = point[1];
+          let newPoint = [x,y];
+          console.log(newPoint);
+          pts[0] = newPoint;
+          console.log(pts);
+        }
+        console.log(pts);
+        physicsObj = new FreeBodyDiagram(pts, myGrid.rects, adjList.adjacencyList, bounds, 6);
+        runningSimulation = true;
         break;
       default:
+        runningSimulation = false;
         console.log("out of actions");
     }
     // if (ticker < myGrid.numPoints()) {
@@ -76,8 +93,19 @@ function draw() {
   let edgeColor = color(235, 180, 10)
 
   myGrid.drawGrid();
-  myGrid.drawBoundpoints();
-  myGrid.drawRects();
+  if(!runningSimulation) {
+    myGrid.drawBoundpoints();
+    myGrid.drawRects();
+    if(!badTrisRemoved) {
+      delaunayMesh.drawTriMesh(edgeColor);
+    }
+    else {
+      adjList.drawAdjList(edgeColor, 2.5);
+    }
+  } else {
+    myGrid.drawBoundpoints(physicsObj.ptList);
+    myGrid.drawRects(physicsObj.ptList);
+  }
   // drawGrid(gx, gy, cs, rws, cms);
   // for (let i = 0; i < ptAmnt; i++) {
   //   let thisPoint = points[i];
@@ -85,10 +113,4 @@ function draw() {
   //   drawPoint(xi, yi, i);
   // }
   // drawRects();
-  if(!badTrisRemoved) {
-    delaunayMesh.drawTriMesh(edgeColor);
-  }
-  else {
-    adjList.drawAdjList(edgeColor, 2.5);
-  }
 }
