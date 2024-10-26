@@ -9,9 +9,9 @@ class CollisionData {
 
 // Grid bounds order is RULD (radial)
 class FreeBodyDiagram {
-    constructor(ptList, rectList, adjArray, gridBounds, wallVelMag = 20, sprCst = 6, sprEqulibriumMod = 1.0, drag = 0.95) {
-        this.ptList = ptList;
-        this.rectList = rectList;
+    constructor(ptList, rectList, adjArray, gridBounds, cellsize = 20, wallVelMag = 20, sprCst = 6, sprEqulibriumMod = 1.2, drag = 0.7) {
+        this.ptList = ptList.map((x) => x);
+        this.rectList = rectList.map((r) => r.map((s) => s * cellsize));
         this.adjArray = adjArray;
         this.wallVelMag = wallVelMag;
         this.sprCst = sprCst;
@@ -173,8 +173,8 @@ class FreeBodyDiagram {
     getEquilibriumSpringLength(i, j) {
         let rectI = this.rectList[i];
         let rectJ = this.rectList[j];
-        let calcX = (rectI[0] + rectI[2] + rectJ[0] + rectJ[2]) / 2
-        let calcY = (rectI[1] + rectI[3] + rectJ[1] + rectJ[3]) / 2
+        let calcX = (rectI[0] + rectI[2] + rectJ[0] + rectJ[2]) / 2;
+        let calcY = (rectI[1] + rectI[3] + rectJ[1] + rectJ[3]) / 2;
         return dist2(0,0,calcX,calcY) * this.sprEqulibriumMod;
     }
 
@@ -203,14 +203,22 @@ class FreeBodyDiagram {
             let tempForceList = [];
             let adjacencies = this.adjArray[i]
             for (let adjacency of adjacencies) {
-                let pi = this.ptList[i]
-                let pj = this.ptList[adjacency]
+                let pi = this.ptList[i];
+                let pj = this.ptList[adjacency];
                 let eL = this.getEquilibriumSpringLength(i, adjacency);
-                let longVec = vectAdd(pi, vectScale(-1, pj));
+                let longVec = vectAdd(pj, vectScale(-1, pi));
                 let longVecMag = dist2(0, 0, longVec[0], longVec[1]);
                 let dx = longVecMag - eL
-                let deltaPosition = vectScale(dx, vectNormalize(longVecMag));
-                let springForce = vectScale(this.sprCst, deltaPosition);
+                //console.log(`${dx} is equal to ${longVecMag} - ${eL}`)
+                //Possible error: no dxs found negative when perhaps should be?
+                let deltaPosition = vectScale(dx, vectNormalize(longVec));
+                //console.log(vectNormalize(longVecMag));
+                let springForce;
+                if(dx > 0) {
+                    springForce = vectScale(this.sprCst / 3, deltaPosition);
+                } else {
+                    springForce = vectScale(this.sprCst * 3, deltaPosition);
+                }
                 tempForceList.push(springForce);
             }
             this.forceLists[i] = tempForceList;
@@ -237,10 +245,11 @@ class FreeBodyDiagram {
             let forces = this.forceLists[i];
             for (let j = 0; j < forces.length; j++) {
                 let force = forces[j];
-                let dV = vectScale(dT, force);
+                let dV = vectScale(dT/1000, force);
                 this.velocityList[i] = vectAdd(this.velocityList[i], dV);
             }
         }
+        //console.log(this.velocityList);
     }
 
     updatePositions(dT) {
@@ -252,7 +261,8 @@ class FreeBodyDiagram {
             //First check for wall collision (and move against wall?)
             //Then check other box collisions
             //this.ptList[i] = vectAdd(pos, vectScale(dT, vel));
-            let proposeMove = vectAdd(pos, vectScale(dT, vel));
+            let dM = vectScale(dT/1000, vel)
+            let proposeMove = vectAdd(pos, dM);
             //console.log(pos);
             //console.log(vectScale(dT, vel));
             let checkWall = this.checkWallCollision(i, proposeMove);
@@ -271,15 +281,28 @@ class FreeBodyDiagram {
                     
             //     }
             // }
-            // for (let adjacency of this.adjArray[i]) {
-            //     let checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
-            //     if(checkBoxCollision.colliding && checkBoxCollision.newCollsion) {
-            //         //TODO: for loop?
-
-            //     }
-            // }
+            //console.log(this.adjArray);
+            for (let j of this.adjArray[i]) {
+                let checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
+                if(checkBoxCollision.colliding) {
+                    //console.log("BEEP!");
+                }
+                if(checkBoxCollision.colliding && checkBoxCollision.newCollsion) {
+                    let steps = 100;
+                    for (let a = 0; a < steps; a++) {
+                        proposeMove = vectAdd(pos, vectScale(a/steps, dM));
+                        checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
+                        if(checkBoxCollision.colliding) {
+                            proposeMove = vectAdd(pos, vectScale(a/steps-1, dM));
+                            checkBoxCollision = this.checkBoxCollision(i, j, proposeMove);
+                            break;
+                        }
+                    }
+                }
+            }
             this.ptList[i] = proposeMove;
         }
+        //console.log(dT);
     }
 
     applyDrag(dT) {
@@ -297,12 +320,9 @@ class FreeBodyDiagram {
         this.calculateVelocities(deltaTime);
         this.updatePositions(deltaTime);
         this.applyDrag(deltaTime);
-        //console.log(this.ptList);
-    }
-
-    roundPoints() {
-        //TODO;
-        return;
+        // console.log(this.ptList);
+        // console.log(this.forceLists);
+        // console.log(this.velocityList);
     }
 
     stopSimulation() {

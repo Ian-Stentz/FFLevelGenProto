@@ -242,7 +242,7 @@ class adjacencyList {
         }
     }
 
-    drawAdjList(color, strokeWgt = 1) {
+    drawAdjList(color, strokeWgt = 1, overridePts = []) {
         //console.log("beep");
         strokeWeight(strokeWgt);
         stroke(color);
@@ -251,6 +251,10 @@ class adjacencyList {
                 if (from < to) {
                     let [x1, y1] = this.indexToPoint(from);
                     let [x2, y2] = this.indexToPoint(to);
+                    if(overridePts.length != 0) {
+                        [x1, y1] = overridePts[from];
+                        [x2, y2] = overridePts[to];
+                    }
                     //console.log(`(${x1}, ${y1}) to (${x2}, ${y2})`);
                     line(x1, y1, x2, y2);
                 }

@@ -61,6 +61,10 @@ class Grid {
     return this.locToMP(xi, yi);
   }
   
+  locToTile(i, j) {
+    return[(i - this.xOffset)/this.cellSize, ((j - this.yOffset)/this.cellSize * -1) + this.rows]
+  }
+
   getBoundpoints(overridePts = []) {
     let Boundpoints = [];
     let myList;
@@ -74,11 +78,7 @@ class Grid {
     }
     return Boundpoints;
   }
-
-  saveBoundpoints(emptyArray) {
-    emptyArray = this.getBoundpoints().map((x) => x);
-  }
-
+  
   getMidpoints() {
     let Midpoints = [];
     for (let point of this.ptList) {
@@ -152,7 +152,7 @@ class Grid {
     if (overridePts.length == 0) {
       Boundpoints = this.getBoundpoints();
     } else {
-      Boundpoints = this.getBoundpoints(overridePts);
+      Boundpoints = overridePts;
     }
     for (let i = 0; i < this.numPoints(); i++) {
       let [x, y] = Boundpoints[i];
@@ -173,6 +173,9 @@ class Grid {
       stroke(cr, cg, cb);
       strokeWeight(4);
       let pt = myList[i];
+      if(overridePts.length != 0) {
+        pt = this.locToTile(pt[0],pt[1]);
+      }
       let myRect = this.rects[i];
       let xr = pt[0] + myRect[0];
       let yu = pt[1] + myRect[1];
@@ -182,5 +185,33 @@ class Grid {
       let [r, d] = this.tileToLoc(xr, yd);
       rect(l, u, r-l, d-u);
     }
+  }
+
+  roundPointToGrid(point) {
+    //round x
+    let remainderX = (point[0] - this.xOffset) % this.cellSize;
+    let newX
+    if (remainderX > this.cellSize / 2) {
+      newX = point[0] + this.cellSize - remainderX;
+    } else {
+      newX = point[0] - remainderX;
+    }
+    //round y
+    let remainderY = (point[1] - this.yOffset) % this.cellSize;
+    let newY
+    if (remainderY > this.cellSize / 2) {
+      newY = point[1] + this.cellSize - remainderY;
+    } else {
+      newY = point[1] - remainderY;
+    }
+    return([newX, newY])
+  }
+
+  roundPointsToGrid(points) {
+    let outPoints = [];
+    for (let point of points) {
+      outPoints.push(this.roundPointToGrid(point));
+    }
+    return outPoints;
   }
 }
